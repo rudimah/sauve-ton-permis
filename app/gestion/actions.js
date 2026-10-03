@@ -10,22 +10,21 @@ export async function mettreAJourAmende(formData) {
     const montantPaye = formData.get('montant_paye') || 0;
     const pointsRetires = formData.get('points_retires') || 0;
 
-    // Données modifiables de l'avis
     const numeroAvis = formData.get('numero_avis');
     const nomFamille = formData.get('nom_famille');
+    const telephone = formData.get('telephone');
     const email = formData.get('email');
     const dateAvis = formData.get('date_avis');
 
     await query(
         `UPDATE amendes
          SET statut = ?, permis_id = ?, statut_paiement = ?, montant_paye = ?, points_retires = ?,
-             numero_avis = ?, nom_famille = ?, email = ?, date_avis = ?
+             numero_avis = ?, nom_famille = ?, telephone = ?, email = ?, date_avis = ?
          WHERE id = ?`,
         [statut, permisId ? Number(permisId) : null, statutPaiement, montantPaye, pointsRetires,
-         numeroAvis, nomFamille, email, dateAvis, id]
+         numeroAvis, nomFamille, telephone, email, dateAvis, id]
     );
 
-    // Mise à jour de toutes les pages concernées en temps réel
     revalidatePath('/');
     revalidatePath('/gestion');
     revalidatePath('/permis');

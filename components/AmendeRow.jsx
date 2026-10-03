@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { mettreAJourAmende, supprimerAmende } from '@/app/gestion/actions';
-import { Check, Trash2, Pencil, UserCircle2, Loader2 } from 'lucide-react';
+import { Check, Trash2, Pencil, UserCircle2, Loader2, Phone } from 'lucide-react';
 import CopyButton from '@/components/CopyButton';
 
 export default function AmendeRow({ amende, listePermis, statutsLabels }) {
@@ -14,10 +14,8 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
      
   const dateAffichage = amende.date_avis ? new Date(amende.date_avis).toLocaleDateString('fr-FR') : '';
 
-  // 1. Déclaration de la variable avant son utilisation
   const permisAssocie = listePermis.find(p => p.id == amende.permis_id);
 
-  // Fonction d'autosave (Se déclenche au blur ou au change)
   async function handleAutoSave(e) {
     if (e) e.preventDefault();
     
@@ -38,7 +36,7 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
   return (
     <tr className="block lg:table-row bg-white dark:bg-slate-900 rounded-2xl shadow-sm lg:shadow-none border border-slate-200 dark:border-slate-800 lg:border-none relative hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
       
-      {/* COLONNE 1 : INFOS DE BASE */}
+      {/* COLONNE 1 : INFOS DE BASE (Téléphone client + Email géré par l'admin) */}
       <td className="block lg:table-cell p-4 lg:p-5 border-b lg:border-none border-slate-100 dark:border-slate-800/80 align-top lg:w-1/4">
         
         <div className="lg:hidden text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Informations Avis</div>
@@ -61,11 +59,22 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
               {amende.nom_famille}
               <CopyButton text={amende.nom_famille} />
             </div>
+
+            {/* Affichage du Téléphone fourni par le client */}
+            {amende.telephone && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1 rounded-lg w-fit flex items-center gap-1.5">
+                  <Phone size={12} /> {amende.telephone}
+                </span>
+                <CopyButton text={amende.telephone} />
+              </div>
+            )}
             
+            {/* Affichage de l'Email ajouté par l'admin */}
             {amende.email && (
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded w-fit">
-                  {amende.email}
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded w-fit" title="Email géré par l'admin">
+                  ✉️ {amende.email}
                 </span>
                 <CopyButton text={amende.email} />
               </div>
@@ -91,8 +100,12 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
               <input form={`form-${amende.id}`} type="text" name="nom_famille" defaultValue={amende.nom_famille} onBlur={handleAutoSave} required className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Email</label>
-              <input form={`form-${amende.id}`} type="email" name="email" defaultValue={amende.email} onBlur={handleAutoSave} className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Téléphone client</label>
+              <input form={`form-${amende.id}`} type="tel" name="telephone" defaultValue={amende.telephone} onBlur={handleAutoSave} className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Email (Ajout Admin)</label>
+              <input form={`form-${amende.id}`} type="email" name="email" defaultValue={amende.email} onBlur={handleAutoSave} className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ajouter l'email..." />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Date d'avis</label>
@@ -102,7 +115,7 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
         </details>
       </td>
       
-      {/* COLONNE 2 : STATUT ET PERMIS */}
+      {/* COLONNE 2 : STATUT ET PERMIS (Inchangé) */}
       <td className="block lg:table-cell p-4 lg:p-5 border-b lg:border-none border-slate-100 dark:border-slate-800/80 align-top lg:min-w-[340px]">
         <div className="lg:hidden text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Statut & Affectation</div>
         
@@ -150,7 +163,7 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
         </form>
       </td>
       
-      {/* COLONNE 3 : PAIEMENT ET POINTS */}
+      {/* COLONNE 3 : PAIEMENT ET POINTS (Inchangé) */}
       <td className="block lg:table-cell p-4 lg:p-5 border-b lg:border-none border-slate-100 dark:border-slate-800/80 align-top lg:min-w-[200px]">
         <div className="lg:hidden text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Paiement & Sanctions</div>
         
@@ -174,7 +187,7 @@ export default function AmendeRow({ amende, listePermis, statutsLabels }) {
         </div>
       </td>
       
-      {/* COLONNE 4 : ACTIONS ET INDICATEURS */}
+      {/* COLONNE 4 : ACTIONS (Inchangé) */}
       <td className="block lg:table-cell p-4 lg:p-5 align-top bg-slate-50/50 dark:bg-slate-800/20 lg:bg-transparent rounded-b-2xl lg:rounded-none">
         <div className="flex lg:flex-col items-center justify-between lg:items-end gap-3 w-full min-h-[40px]">
           

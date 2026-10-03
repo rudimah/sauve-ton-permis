@@ -6,16 +6,33 @@ export default function DepotPage({ searchParams }) {
     async function soumettreAmende(formData) {
         'use server';
         const numeroAvis = formData.get('numero_avis');
-        const email = formData.get('email');
+        const telephone = formData.get('telephone');
         const nomFamille = formData.get('nom_famille');
         const dateAvis = formData.get('date_avis');
 
+        // 1. Insertion de l'amende avec le téléphone
         await query(
-            `INSERT INTO amendes (numero_avis, email, nom_famille, date_avis, statut)
+            `INSERT INTO amendes (numero_avis, telephone, nom_famille, date_avis, statut)
              VALUES (?, ?, ?, ?, 'en_attente_prise_en_charge')`,
-            [numeroAvis, email, nomFamille, dateAvis]
+            [numeroAvis, telephone, nomFamille, dateAvis]
         );
-        revalidatePath('/amendes');
+
+        // 2. Notification Telegram automatique pour l'admin
+        const token = process.env.TELEGRAM_BOT_TOKEN;
+        const chatId = process.env.TELEGRAM_CHAT_ID;
+        
+        if (token && chatId) {
+            const message = `🚨 *NOUVELLE AMENDE DÉPOSÉE !*\n\n👤 Demandeur : *${nomFamille}*\n📞 Tél : \`${telephone}\`\n📄 N° Avis : \`${numeroAvis}\`\n📅 Date : ${dateAvis}`;
+            
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' }),
+            }).catch(err => console.error("Erreur notif Telegram:", err));
+        }
+
+        revalidatePath('/gestion');
+        revalidatePath('/');
         redirect('/depot?succes=true');
     }
 
@@ -28,7 +45,7 @@ export default function DepotPage({ searchParams }) {
                     Demander une contestation
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400">
-                    Renseignez les données de l'avis. Notre équipe vous contactera pour obtenir les éléments du permis.
+                    Renseignez les données de l'avis et votre numéro de téléphone. Notre équipe vous contactera rapidement.
                 </p>
             </div>
 
@@ -51,8 +68,8 @@ export default function DepotPage({ searchParams }) {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Adresse Email</label>
-                    <input type="email" name="email" required className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl p-3.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="votre@email.com" />
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Numéro de téléphone</label>
+                    <input type="tel" name="telephone" required className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl p-3.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" placeholder="ex: 06 12 34 56 78" />
                 </div>
                 <div className="space-y-2">
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Date de l'avis</label>
