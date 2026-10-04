@@ -1,6 +1,7 @@
 import './globals.css';
 import { cookies } from 'next/headers';
 import Navbar from '@/components/Navbar';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
     title: 'SAUVE TON PERMIS',
@@ -22,6 +23,8 @@ export default function RootLayout({ children }) {
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex-1 w-full animate-in fade-in duration-500">
                     {children}
                 </main>
+
+                <Analytics />
                 
             </body>
         </html>
