@@ -16,14 +16,12 @@ export async function POST(request) {
     
     const userAgent = request.headers.get('user-agent') || 'Appareil Inconnu';
 
-    // Récupération de la localisation
     let location = "Localisation inconnue";
     
     if (ip === '::1' || ip === '127.0.0.1') {
         location = "Local (Votre ordinateur)";
     } else {
         try {
-            // Appel à une API de géolocalisation gratuite
             const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,city`);
             const geoData = await geoRes.json();
             
@@ -45,7 +43,6 @@ export async function POST(request) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     global.authCodes[chatId] = { code, expires: now + 300000 };
 
-    // Ajout de la localisation au message
     const text = `🚨 *SAUVE TON PERMIS*\n\nVotre code de connexion unique est : \`${code}\`\n\n📱 *Appareil* : ${userAgent}\n🌐 *IP* : ${ip}\n📍 *Lieu* : ${location}\n\n_Ce code expire dans 5 minutes._`;
 
     const url = `https://api.telegram.org/bot${token}/sendMessage`;

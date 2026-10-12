@@ -12,20 +12,18 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-    const isAuthenticated = cookies().has('auth_session');
+    const sessionCookie = cookies().get('auth_session');
+    const expectedSecret = process.env.SESSION_SECRET || 'valeur_secrete_a_changer_en_production';
+    const isAuthenticated = sessionCookie?.value === expectedSecret;
 
     return (
         <html lang="fr" className="antialiased">
             <body className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col">
-                
                 <Navbar isAuthenticated={isAuthenticated} />
-                
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex-1 w-full animate-in fade-in duration-500">
                     {children}
                 </main>
-
                 <Analytics />
-                
             </body>
         </html>
     );

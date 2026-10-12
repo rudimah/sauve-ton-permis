@@ -4,17 +4,17 @@ import { cookies } from 'next/headers';
 export async function POST(request) {
     const { code } = await request.json();
     const chatId = process.env.TELEGRAM_CHAT_ID;
-
     const storedAuth = global.authCodes?.[chatId];
 
     if (storedAuth && storedAuth.code === code && storedAuth.expires > Date.now()) {
-        // Code valide ! On supprime le code utilisé
         delete global.authCodes[chatId];
+        
+        const sessionSecret = process.env.SESSION_SECRET || 'valeur_secrete_a_changer_en_production';
 
-        // Création du cookie de session (valable 7 jours)
-        cookies().set('auth_session', 'authenticated_secure_token', {
+        cookies().set('auth_session', sessionSecret, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
             maxAge: 60 * 60 * 24 * 7,
             path: '/',
         });
